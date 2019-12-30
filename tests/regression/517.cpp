@@ -22,22 +22,20 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/globebrowsing/geodetics/ellipsoid.h>
-#include <thread>
+#include "catch2/catch.hpp"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
-#include <glm/glm.hpp>
+#include <openspace/properties/optionproperty.h>
 
-class EllipsoidTest : public testing::Test {};
+TEST_CASE("Regression: 527", "[regression]") {
+    // Error in OptionProperty if values not starting at 0 are used
+    openspace::properties::OptionProperty p({ "id", "gui", "desc" });
 
-using namespace openspace;
+    p.addOptions({
+        { -1, "a" },
+        { -2, "b" }
+        });
 
-TEST_F(EllipsoidTest, GeodeticSurfaceNormal) {
-	Ellipsoid ellipsoid(Vec3(1, 1, 1));
 
-	Vec3 geodeticNormal = ellipsoid.geodeticSurfaceNormal(Vec3(0, 0, 1));
-	Vec3 expectedNormal = Vec3(0, 0, 1);
-
-	ASSERT_EQ(geodeticNormal, expectedNormal);
+    p = -1;
+    REQUIRE(p.option().description == "a");
 }

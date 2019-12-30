@@ -1,0 +1,56 @@
+##########################################################################################
+#                                                                                        #
+# OpenSpace                                                                              #
+#                                                                                        #
+# Copyright (c) 2014-2019                                                                #
+#                                                                                        #
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this   #
+# software and associated documentation files (the "Software"), to deal in the Software  #
+# without restriction, including without limitation the rights to use, copy, modify,     #
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to     #
+# permit persons to whom the Software is furnished to do so, subject to the following    #
+# conditions:                                                                            #
+#                                                                                        #
+# The above copyright notice and this permission notice shall be included in all copies  #
+# or substantial portions of the Software.                                               #
+#                                                                                        #
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,    #
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A          #
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT     #
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF   #
+# CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE   #
+# OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                          #
+##########################################################################################
+
+add_executable(
+    OpenSpaceTest
+    main.cpp
+    test_assetloader.cpp
+    test_concurrentjobmanager.cpp
+    test_concurrentqueue.cpp
+    test_configurationmanager.cpp
+    test_documentation.cpp
+    test_iswamanager.cpp
+    test_latlonpatch.cpp
+    test_lrucache.cpp
+    test_luaconversions.cpp
+    test_optionproperty.cpp
+    test_patchcoverageprovider.cpp
+    test_rawvolumeio.cpp
+    test_scriptscheduler.cpp
+    test_spicemanager.cpp
+    test_temporaltileprovider.cpp
+    test_timeline.cpp
+
+    regression/517.cpp
+)
+
+set_openspace_compile_settings(OpenSpaceTest)
+
+target_include_directories(OpenSpaceTest PUBLIC
+"${GHOUL_BASE_DIR}/ext/catch2/single_include"
+)
+target_compile_definitions(OpenSpaceTest PUBLIC "GHL_THROW_ON_ASSERT")
+target_link_libraries(OpenSpaceTest PUBLIC openspace-core)
+
+set_folder_location(OpenSpaceTest "Unit Tests")
