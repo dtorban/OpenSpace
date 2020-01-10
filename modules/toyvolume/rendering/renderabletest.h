@@ -22,23 +22,45 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include <modules/toyvolume/toyvolumemodule.h>
+#ifndef __OPENSPACE_MODULE_TOYVOLUME___RENDERABLETEST___H__
+#define __OPENSPACE_MODULE_TOYVOLUME___RENDERABLETEST___H__
 
-#include <modules/toyvolume/rendering/renderabletoyvolume.h>
-#include <modules/toyvolume/rendering/renderabletest.h>
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
+#include <openspace/rendering/renderable.h>
+
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
+
+#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
-ToyVolumeModule::ToyVolumeModule() : OpenSpaceModule(Name) {}
+struct RenderData;
 
-void ToyVolumeModule::internalInitialize(const ghoul::Dictionary&) {
-    auto fRenderable = FactoryManager::ref().factory<Renderable>();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-    fRenderable->registerClass<RenderableToyVolume>("RenderableToyVolume");
-    fRenderable->registerClass<RenderableTest>("RenderableTest");
-}
+class RenderableTest : public Renderable {
+public:
+    RenderableTest(const ghoul::Dictionary& dictionary);
+    ~RenderableTest();
+
+    void initializeGL() override;
+    void deinitializeGL() override;
+    bool isReady() const override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
+    void update(const UpdateData& data) override;
+
+private:
+    properties::Vec3Property _size;
+    properties::IntProperty _scalingExponent;
+    properties::FloatProperty _stepSize;
+    properties::Vec3Property _translation;
+    properties::Vec3Property _rotation;
+    properties::Vec4Property _color;
+    properties::FloatProperty _downScaleVolumeRendering;
+
+    GLuint vbo, vao, vshader, fshader, shaderProgram, externalTexture;
+};
 
 } // namespace openspace
+
+#endif // __OPENSPACE_MODULE_TOYVOLUME___RENDERABLETOYVOLUME___H__

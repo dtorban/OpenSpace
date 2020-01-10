@@ -1,15 +1,15 @@
 -- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_TOYVOLUME enabled
 
 local assetHelper = asset.require("util/asset_helper")
-local transforms = asset.require("scene/solarsystem/sun/transforms")
+local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 
 local ToyVolume = {
-    Identifier = "RenderableToyVolume",
-    Parent = transforms.SolarSystemBarycenter.Identifier,
+    Identifier = "RenderableTest",
+    Parent = transforms.EarthBarycenter.Identifier,
     Renderable = {
-        Type = "RenderableToyVolume2",
+        Type = "RenderableTest",
         Size = {5, 5, 5},
-        ScalingExponent = 11,
+        ScalingExponent = 8,
         StepSize = 0.01,
         Color = {1, 0, 0, 1}
     },

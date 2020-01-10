@@ -9,6 +9,8 @@ local propertyHelper = asset.require('util/property_helper')
 -- Specifying which other assets should be loaded in this scene
 asset.require('spice/base')
 
+asset.require('examples/volume/toyvolume')
+asset.require('examples/volume/renderabletest')
 asset.require('scene/solarsystem/sun/sun')
 asset.require('scene/solarsystem/sun/glare')
 asset.require('scene/solarsystem/planets')
