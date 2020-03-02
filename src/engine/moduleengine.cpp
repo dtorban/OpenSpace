@@ -37,18 +37,33 @@ namespace {
 
 namespace openspace {
 
-ModuleEngine::ModuleEngine() : properties::PropertyOwner({ "Modules" }) {}
+ModuleEngine::ModuleEngine() : properties::PropertyOwner({ "Modules" }), _pluginEngine(NULL) {}
+
+ModuleEngine::~ModuleEngine() {
+    if (!_pluginEngine) {
+        delete _pluginEngine;
+    }
+}
 
 void ModuleEngine::initialize(
                      const std::map<std::string, ghoul::Dictionary>& moduleConfigurations)
 {
-    for (OpenSpaceModule* m : AllModules()) {
+    std::vector<std::string> pluginFolders;
+    pluginFolders.push_back("build/plugins");
+    _pluginEngine = new PluginEngine(pluginFolders);
+
+    std::vector<OpenSpaceModule*> allModules = AllModules();
+    std::vector<OpenSpaceModule*> pluginModules = _pluginEngine->getModules();
+    allModules.insert(allModules.end(), pluginModules.begin(), pluginModules.end());
+
+    for (OpenSpaceModule* m : allModules) {
         const std::string& identifier = m->identifier();
         auto it = moduleConfigurations.find(identifier);
         ghoul::Dictionary configuration;
         if (it != moduleConfigurations.end()) {
             configuration = it->second;
         }
+
         registerModule(std::unique_ptr<OpenSpaceModule>(m), configuration);
     }
 }

@@ -2,7 +2,7 @@
  *                                                                                       *
  * OpenSpace                                                                             *
  *                                                                                       *
- * Copyright (c) 2014-2020                                                               *
+ * Copyright (c) 2014-2019                                                               *
  *                                                                                       *
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this  *
  * software and associated documentation files (the "Software"), to deal in the Software *
@@ -22,30 +22,28 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_CORE___PLUGINENGINE___H__
-#define __OPENSPACE_CORE___PLUGINENGINE___H__
+#ifndef __OPENSPACE_MODULE_TOYVOLUME___TESTPLUGINMODULE___H__
+#define __OPENSPACE_MODULE_TOYVOLUME___TESTPLUGINMODULE___H__
 
-#include <vector>
 #include <openspace/util/openspacemodule.h>
-#include <openspace/engine/sharedlibrary.h>
 
 namespace openspace {
 
-class PluginEngine {
+class TestPluginModule : public OpenSpaceModule {
 public:
-	PluginEngine(const std::vector<std::string>& folders);
-	~PluginEngine();
+    constexpr static const char* Name = "TestPlugin";
 
-	std::vector<OpenSpaceModule*> getModules() { return modules; }
+    TestPluginModule(const std::string& path);
+
+    void internalInitialize(const ghoul::Dictionary&) override;
+
+protected:
+	std::string modulePath() const { return path; }
+
 private:
-	std::vector<std::string> listDirectory(const std::string& path, bool directories, std::string extension = "");
-	void loadPlugins(const std::string& pluginDir);
-	void loadPlugin(const std::string& filePath, const std::string& name);
-
-	std::vector<SharedLibrary*> libraries;
-	std::vector<OpenSpaceModule*> modules;
+	std::string path;
 };
 
 } // namespace openspace
 
-#endif
+#endif // __OPENSPACE_MODULE_TOYVOLUME___TESTPLUGINMODULE___H__

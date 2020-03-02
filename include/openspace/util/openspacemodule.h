@@ -162,7 +162,7 @@ protected:
      * Returns the path for this module, possibly containing ghoul::filesystem::FileSystem
      * path tokens.
      */
-    std::string modulePath() const;
+    virtual std::string modulePath() const;
 
     /**
      * Returns a const pointer to the module engine

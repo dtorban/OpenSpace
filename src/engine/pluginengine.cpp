@@ -36,14 +36,16 @@ PluginEngine::PluginEngine(const std::vector<std::string>& folders) {
 	for (int f = 0; f < folders.size(); f++) {
 		std::vector<std::string> pluginDirs = listDirectory(folders[f], true);
 
-		for (int f = 0; f < pluginDirs.size(); f++) {
-			if (pluginDirs[f].find(".plugin") != std::string::npos) {
-				std::string pluginDir = folders[f] + "/" + pluginDirs[f];
+		for (int i = 0; i < pluginDirs.size(); i++) {
+			//if (pluginDirs[f].find(".plugin") != std::string::npos) {
+				std::string pluginDir = folders[f] + "/" + pluginDirs[i];
 
 				loadPlugins(pluginDir);
-			}
+			//}
 		}
 	}
+
+	//exit(0);
 }
 
 PluginEngine::~PluginEngine() {
@@ -54,10 +56,11 @@ PluginEngine::~PluginEngine() {
 
 void PluginEngine::loadPlugins(const std::string& pluginDir) {
 
-	std::string dir = "/lib/";
+	//std::string dir = "/lib/";
+	std::string dir = "";
 
 #if defined(WIN32)
-	dir = "/bin/";
+	//dir = "/bin/";
 	std::string ext = ".dll";
 #elif defined(__APPLE__)
 	std::string ext = ".dylib";
@@ -69,26 +72,26 @@ void PluginEngine::loadPlugins(const std::string& pluginDir) {
 
 	std::vector<std::string> libs = listDirectory(libDir, false, ext);
 	for (int i = 0; i < libs.size(); i++) {
-		loadPlugin(libDir + libs[i]);
+		loadPlugin(libDir, libs[i]);
 	}
 
 
 }
 
-void PluginEngine::loadPlugin(const std::string& path) {
+void PluginEngine::loadPlugin(const std::string& path, const std::string& name) {
 
-	SharedLibrary* lib = new SharedLibrary(path, true);
+	SharedLibrary* lib = new SharedLibrary(path + "/" + name, true);
 	if (lib->isLoaded())
 	{
-		typedef OpenSpaceModule* load_t();
-		load_t* loadPlugin = lib->loadSymbol<load_t>("createOpenSpaceModule");
-		if (loadPlugin == NULL)
+		typedef OpenSpaceModule* load_t(const char*);
+		load_t* createModule = lib->loadSymbol<load_t>("createOpenSpaceModule");
+		if (createModule == NULL)
 		{
 			delete lib;
 			return;
 		}
 
-		OpenSpaceModule* pluginModule = loadPlugin();
+		OpenSpaceModule* pluginModule = createModule(path.c_str());
 		int countRegistered = 0;
 		if (pluginModule != NULL) {
 			countRegistered++;

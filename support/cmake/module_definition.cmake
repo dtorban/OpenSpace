@@ -68,6 +68,19 @@ function (create_new_module module_name output_library_name library_mode)
     set(${output_library_name} ${library_name} PARENT_SCOPE)
 endfunction ()
 
+function (create_new_plugin module_name output_library_name library_mode)
+    # Create a library name of the style: openspace-module-${name}
+    create_library_name(${module_name} library_name)
+
+    # Create the library
+    add_library(${library_name} ${library_mode} ${module_files} ${ARGN})
+
+    # Set compile settings that are common to all modules
+    set_openspace_compile_settings(${library_name})
+
+    handle_module_dependencies(${library_name} ${module_name})
+endfunction ()
+
 
 
 function (register_external_libraries libraries)
