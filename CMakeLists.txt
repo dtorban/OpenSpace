@@ -32,6 +32,14 @@ set(OPENSPACE_VERSION_PATCH 1)
 set(OPENSPACE_VERSION_STRING "Beta-5")
 
 
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  # Linux specific code
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC") 
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC") 
+endif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+
 set(OPENSPACE_BASE_DIR "${PROJECT_SOURCE_DIR}")
 set(OPENSPACE_CMAKE_EXT_DIR "${OPENSPACE_BASE_DIR}/support/cmake")
 set(GHOUL_BASE_DIR "${OPENSPACE_BASE_DIR}/ext/ghoul")
@@ -295,3 +303,5 @@ add_custom_command(
 include(${OPENSPACE_CMAKE_EXT_DIR}/packaging.cmake)
 
 end_header("End: Configuring OpenSpace project")
+
+add_subdirectory(plugins)

@@ -39,6 +39,8 @@ set(OPENSPACE_SOURCE
   ${OPENSPACE_BASE_DIR}/src/engine/logfactory.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/moduleengine.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/moduleengine_lua.inl
+  ${OPENSPACE_BASE_DIR}/src/engine/sharedlibrary.cpp
+  ${OPENSPACE_BASE_DIR}/src/engine/pluginengine.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine.cpp
   ${OPENSPACE_BASE_DIR}/src/engine/openspaceengine_lua.inl
   ${OPENSPACE_BASE_DIR}/src/engine/syncengine.cpp
@@ -221,6 +223,8 @@ set(OPENSPACE_HEADER
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/logfactory.h
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.h
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/moduleengine.inl
+  ${OPENSPACE_BASE_DIR}/include/openspace/engine/sharedlibrary.h
+  ${OPENSPACE_BASE_DIR}/include/openspace/engine/pluginengine.h
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/openspaceengine.h
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/syncengine.h
   ${OPENSPACE_BASE_DIR}/include/openspace/engine/virtualpropertymanager.h
@@ -457,5 +461,9 @@ if (APPLE)
   find_library(APPKIT_LIBRARY AppKit REQUIRED)
   target_link_libraries(openspace-core ${APPKIT_LIBRARY})
 endif ()
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  target_link_libraries(openspace-core dl)
+endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 set_openspace_compile_settings(openspace-core)

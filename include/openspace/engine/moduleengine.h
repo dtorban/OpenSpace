@@ -30,6 +30,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <openspace/engine/pluginengine.h>
 
 namespace ghoul { class Dictionary; }
 namespace ghoul::systemcapabilities { struct Version; }
@@ -51,6 +52,7 @@ namespace scripting { struct LuaLibrary; }
 class ModuleEngine : public properties::PropertyOwner {
 public:
     ModuleEngine();
+    ~ModuleEngine();
 
     /**
      * Registers all of the OpenSpaceModule%s which are created by the CMake configuration
@@ -126,6 +128,7 @@ public:
 private:
     /// The list of all registered OpenSpaceModule%s
     std::vector<std::unique_ptr<OpenSpaceModule>> _modules;
+    PluginEngine* _pluginEngine;
 };
 
 } // namespace openspace
