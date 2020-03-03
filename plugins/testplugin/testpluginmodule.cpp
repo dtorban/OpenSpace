@@ -25,6 +25,7 @@
 
 #include<iostream>
 #include "testpluginmodule.h"
+#include <openspace/util/plugininfo.h>
 
 namespace openspace {
 
@@ -48,11 +49,11 @@ void TestPluginModule::internalInitialize(const ghoul::Dictionary&) {
 
 extern "C" {
 
-OPENSPACE_API openspace::OpenSpaceModule* createOpenSpaceModule(const char* modulePath) {
+OPENSPACE_API openspace::OpenSpaceModule* createOpenSpaceModule(openspace::PluginInfo pluginInfo) {
 	std::cout << "Does it work?" << std::endl;
 	//exit(0);
-	std::string path(modulePath);
-	return new openspace::TestPluginModule(path);
+	std::string path(pluginInfo.path);
+	return new openspace::TestPluginModule(pluginInfo.path);
 }
 
 }

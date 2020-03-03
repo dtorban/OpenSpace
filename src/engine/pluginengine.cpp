@@ -23,6 +23,7 @@
  ****************************************************************************************/
 
 #include <openspace/engine/pluginengine.h>
+#include <openspace/util/plugininfo.h>
 
 #if defined(WIN32)
 #include <Windows.h>
@@ -33,6 +34,7 @@
 namespace openspace {
 
 PluginEngine::PluginEngine(const std::vector<std::string>& folders) {
+
 	for (int f = 0; f < folders.size(); f++) {
 		std::vector<std::string> pluginDirs = listDirectory(folders[f], true);
 
@@ -83,7 +85,7 @@ void PluginEngine::loadPlugin(const std::string& path, const std::string& name) 
 	SharedLibrary* lib = new SharedLibrary(path + "/" + name, true);
 	if (lib->isLoaded())
 	{
-		typedef OpenSpaceModule* load_t(const char*);
+		typedef OpenSpaceModule* load_t(PluginInfo);
 		load_t* createModule = lib->loadSymbol<load_t>("createOpenSpaceModule");
 		if (createModule == NULL)
 		{
@@ -91,7 +93,11 @@ void PluginEngine::loadPlugin(const std::string& path, const std::string& name) 
 			return;
 		}
 
-		OpenSpaceModule* pluginModule = createModule(path.c_str());
+		PluginInfo pluginInfo;
+		pluginInfo.factoryManager = &FactoryManager::ref();
+		pluginInfo.path = path;
+
+		OpenSpaceModule* pluginModule = createModule(pluginInfo);
 		int countRegistered = 0;
 		if (pluginModule != NULL) {
 			countRegistered++;
