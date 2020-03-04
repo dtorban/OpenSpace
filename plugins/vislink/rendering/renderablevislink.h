@@ -37,7 +37,7 @@
 
 #include "OpenGL.h"
 //#include <ghoul/opengl/ghoul_gl.h>
-#include <VisLink/VisLinkAPI.h>
+#include <VisLink/net/Client.h>
 
 namespace openspace {
 
@@ -68,7 +68,8 @@ private:
     properties::FloatProperty _downScaleVolumeRendering;
 
     GLuint vbo, vao, vshader, fshader, shaderProgram, externalTexture;
-    vislink::VisLinkAPI* visLinkClient;
+    vislink::Client* visLinkClient;
+    vislink::VisLinkAPI* visLinkAPI;
     OpenSpaceModule* module;
 };
 

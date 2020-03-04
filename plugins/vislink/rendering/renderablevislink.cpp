@@ -31,7 +31,6 @@
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/glm.h>
 #include <VisLink/impl/VisLinkAPIImpl.h>
-#include <VisLink/net/Client.h>
 #include "vislinkmodule.h"
 #include "rendering/VLOpenSpaceProcLoader.h"
 
@@ -137,11 +136,12 @@ RenderableVisLink::RenderableVisLink(const ghoul::Dictionary& dictionary, OpenSp
             " Using default value."); 
     }*/
     visLinkClient = new Client();
+    visLinkAPI = visLinkClient;
 
 }
 
 RenderableVisLink::~RenderableVisLink() {
-    delete visLinkClient;
+    delete visLinkAPI;
 }
 
 /*class VLGlfwProcLoader : public ProcLoader {
@@ -186,13 +186,11 @@ void RenderableVisLink::linkShaderProgram(GLuint shaderProgram) {
 }
 
 void RenderableVisLink::initializeGL() {
-    visLinkClient = new VisLinkOpenGL(visLinkClient, new VLOpenSpaceProcLoader(module));
+    visLinkAPI = new VisLinkOpenGL(visLinkAPI, new VLOpenSpaceProcLoader(module));
     TextureInfo texInfo;
-    visLinkClient->createSharedTexture("hi", texInfo);
-    std::cout << static_cast<VisLinkModule*>(module)->getPluginInfo().windowDelegate << std::endl;
-    Texture tex = visLinkClient->getSharedTexture("hi");
-    std::cout << "External Handle" << tex.externalHandle << std::endl;
-    exit(0);
+    visLinkAPI->createSharedTexture("test.png", texInfo);
+    Texture tex = visLinkAPI->getSharedTexture("test.png");
+    externalTexture = tex.id;
 
 	    // Init GL
            /* glEnable(GL_DEPTH_TEST);
@@ -257,16 +255,17 @@ void RenderableVisLink::initializeGL() {
             vshader = compileShader(vertexShader, GL_VERTEX_SHADER);
 
             std::string fragmentShader =
-                    "#version 330 \n"
-                    "in vec3 col;"
-                    "out vec4 colorOut;"
-                    "uniform sampler2D tex; "
-                    ""
-                    "void main() { "
-                    //"   vec4 texColor = texture(tex, col.xy);"
-                    //"   colorOut = texColor; "
-                    "   colorOut = vec4(1,0,0,1); "
-                    "}";
+                "#version 330 \n"
+                "in vec3 col;"
+                "out vec4 colorOut;"
+                "uniform sampler2D tex; "
+                ""
+                "void main() { "
+                "   vec2 coord = vec2(col.x, col.y);"
+                "   vec4 texColor = texture(tex, coord);"
+                "   colorOut = texColor; "
+                "   colorOut = vec4(colorOut.xyz,1); "
+                "}";
             fshader = compileShader(fragmentShader, GL_FRAGMENT_SHADER); 
 
             // Create shader program
@@ -279,6 +278,12 @@ void RenderableVisLink::initializeGL() {
             GLenum format = GL_RGBA;
             GLenum internalFormat = GL_RGBA;
             GLenum type = GL_UNSIGNED_BYTE;
+
+            glActiveTexture(GL_TEXTURE0+0);
+            glBindTexture(GL_TEXTURE_2D, externalTexture);
+            GLint loc = glGetUniformLocation(shaderProgram, "tex");
+            glUniform1i(loc, 0);
+
 
             /*mainImage.addComponent(new Image("app/textures/test.png"));
             mainImage.update();
@@ -360,7 +365,6 @@ void RenderableVisLink::update(const UpdateData& data) {
 }
 
 void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
-
     /*RaycasterTask task { _raycaster.get(), data };
     tasks.raycasterTasks.push_back(task);*/
         /*const glm::mat4 modelTransform =
@@ -401,10 +405,11 @@ void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
 
         // Draw quad
         glBindVertexArray(vao);
-        /*glActiveTexture(GL_TEXTURE0+0);
+        glActiveTexture(GL_TEXTURE0+0);
+        //std::cout << externalTexture << std::endl;
         glBindTexture(GL_TEXTURE_2D, externalTexture);
-        loc = glGetUniformLocation(shaderProgram, "tex");
-        glUniform1i(loc, 0);*/
+        //loc = glGetUniformLocation(shaderProgram, "tex");
+        //glUniform1i(loc, 0);
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
