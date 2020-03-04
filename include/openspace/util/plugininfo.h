@@ -6,9 +6,11 @@
 
 namespace openspace {
 
+
 struct PluginInfo {
 	FactoryManager* factoryManager;
 	std::string path;
+	void* windowDelegate;
 };
 
 }

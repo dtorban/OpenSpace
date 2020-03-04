@@ -22,77 +22,22 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#include "OpenGL.h"
+#ifndef __OPENSPACE_MODULE_TOYVOLUME___RVLOpenSpaceProcLoader___H__
+#define __OPENSPACE_MODULE_TOYVOLUME___RVLOpenSpaceProcLoader___H__
 
-#include<iostream>
-#include "vislinkmodule.h"
-#include "rendering/renderabletest.h"
-#include "rendering/renderablevislink.h"
-#include <openspace/util/factorymanager.h>
-#include <ghoul/misc/assert.h>
-#include <ghoul/misc/templatefactory.h>
-
-using namespace vislink;
+#include <openspace/util/openspacemodule.h>
+#include <VisLink/image/Texture.h>
 
 namespace openspace {
 
-VisLinkModule::VisLinkModule(PluginInfo pluginInfo) : OpenSpaceModule(Name), pluginInfo(pluginInfo) {}
-
-VisLinkModule::~VisLinkModule() {
-	serverThread->join();
-	delete serverThread;
-	delete visLinkServer;
-}
-
-void VisLinkModule::internalInitialize(const ghoul::Dictionary&) {
-	visLinkServer = new Server();
-	serverThread = new std::thread(&VisLinkModule::runServer, this);
-
-	std::cout << "Initialize vislink" << std::endl;
-	//auto fRenderable = FactoryManager::ref().factory<Renderable>();
-	auto fRenderable = this->pluginInfo.factoryManager->factory<Renderable>();
-	//Renderable* r = new Renderable();
-    ghoul_assert(fRenderable, "No renderable factory existed");
-	//exit(0);
-    //fRenderable->registerClass<RenderableTest>("RenderableTest");
-    
-    //fRenderable->registerClass<RenderableVisLink>("RenderableVisLink");
-
-    std::function<Renderable*(bool, const ghoul::Dictionary&)> function =
-        [this](bool use, const ghoul::Dictionary& dictionary) -> Renderable* {
-        if (use)
-            return new RenderableVisLink(dictionary, this);
-        else
-            return nullptr;
-    };
-    fRenderable->registerClass("RenderableVisLink", function);
-}
-
-void VisLinkModule::internalInitializeGL() {
-    initializeGLExtentions();
-}
-
-void VisLinkModule::runServer() {
-	while (true) {
-		std::cout << "Running" << std::endl;
-		visLinkServer->service();
-	}
-}
+class VLOpenSpaceProcLoader : public vislink::ProcLoader {
+public:
+    VLOpenSpaceProcLoader(OpenSpaceModule* module) : module(module) {}
+    vislink::VLProc getProc(const char* name);
+private:
+    OpenSpaceModule* module;
+};
 
 } // namespace openspace
 
-#if defined(WIN32)
-#define OPENSPACE_API __declspec(dllexport)
-#else
-#define OPENSPACE_API
-#endif
-
-extern "C" {
-
-OPENSPACE_API openspace::OpenSpaceModule* createOpenSpaceModule(openspace::PluginInfo pluginInfo) {
-	//exit(0);
-	std::cout << "creating module for vislink" << std::endl;
-	return new openspace::VisLinkModule(pluginInfo);
-}
-
-}
+#endif // __OPENSPACE_MODULE_TOYVOLUME___RENDERABLETOYVOLUME___H__

@@ -37,6 +37,7 @@ set(HEADER_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/vislinkmodule.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletest.h
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablevislink.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/VLOpenSpaceProcLoader.h
 )
 source_group("Header Files" FILES ${HEADER_FILES})
 
@@ -44,6 +45,7 @@ set(SOURCE_FILES
   ${CMAKE_CURRENT_SOURCE_DIR}/vislinkmodule.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderabletest.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/rendering/renderablevislink.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/rendering/VLOpenSpaceProcLoader.cpp
 )
 source_group("Source Files" FILES ${SOURCE_FILES})
 

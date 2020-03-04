@@ -24,6 +24,8 @@
 
 #include <openspace/engine/pluginengine.h>
 #include <openspace/util/plugininfo.h>
+#include <openspace/engine/globals.h>
+#include <openspace/engine/windowdelegate.h>
 
 #if defined(WIN32)
 #include <Windows.h>
@@ -96,6 +98,8 @@ void PluginEngine::loadPlugin(const std::string& path, const std::string& name) 
 		PluginInfo pluginInfo;
 		pluginInfo.factoryManager = &FactoryManager::ref();
 		pluginInfo.path = path;
+		pluginInfo.windowDelegate = &global::windowDelegate;
+
 
 		OpenSpaceModule* pluginModule = createModule(pluginInfo);
 		int countRegistered = 0;

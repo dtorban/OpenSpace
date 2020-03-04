@@ -41,6 +41,7 @@ public:
 
     void internalInitialize(const ghoul::Dictionary&) override;
     void internalInitializeGL() override;
+    const PluginInfo& getPluginInfo() const { return pluginInfo; }
 
 protected:
 	std::string modulePath() const { return pluginInfo.path; }

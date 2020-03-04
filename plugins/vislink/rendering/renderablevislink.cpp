@@ -30,7 +30,12 @@
 #include <openspace/util/updatestructures.h>
 #include <ghoul/logging/logmanager.h>
 #include <ghoul/glm.h>
+#include <VisLink/impl/VisLinkAPIImpl.h>
+#include <VisLink/net/Client.h>
+#include "vislinkmodule.h"
+#include "rendering/VLOpenSpaceProcLoader.h"
 
+using namespace vislink;
 
 namespace {
     constexpr const char* _loggerCat = "Renderable VisLink";
@@ -80,7 +85,7 @@ namespace {
 
 namespace openspace {
 
-RenderableVisLink::RenderableVisLink(const ghoul::Dictionary& dictionary)
+RenderableVisLink::RenderableVisLink(const ghoul::Dictionary& dictionary, OpenSpaceModule* module)
     : Renderable(dictionary)
     , _size(SizeInfo, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f))
     , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
@@ -89,6 +94,7 @@ RenderableVisLink::RenderableVisLink(const ghoul::Dictionary& dictionary)
     , _rotation(RotationInfo, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0), glm::vec3(6.28f))
     , _color(ColorInfo, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f))
     , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
+    , module(module)
 {
     if (dictionary.hasKeyAndValue<double>(ScalingExponentInfo.identifier)) {
         _scalingExponent = static_cast<int>(
@@ -130,11 +136,20 @@ RenderableVisLink::RenderableVisLink(const ghoul::Dictionary& dictionary)
         LINFO("Number of raycasting steps not specified for ToyVolume." 
             " Using default value."); 
     }*/
+    visLinkClient = new Client();
 
 }
 
-RenderableVisLink::~RenderableVisLink() {}
+RenderableVisLink::~RenderableVisLink() {
+    delete visLinkClient;
+}
 
+/*class VLGlfwProcLoader : public ProcLoader {
+public:
+    VLProc getProc(const char* name) {
+        return nullptr;//glfwGetProcAddress(name);
+    }
+};*/
 
     /// Compiles shader
 GLuint RenderableVisLink::compileShader(const std::string& shaderText, GLenum shaderType) {
@@ -171,7 +186,14 @@ void RenderableVisLink::linkShaderProgram(GLuint shaderProgram) {
 }
 
 void RenderableVisLink::initializeGL() {
-    
+    visLinkClient = new VisLinkOpenGL(visLinkClient, new VLOpenSpaceProcLoader(module));
+    TextureInfo texInfo;
+    visLinkClient->createSharedTexture("hi", texInfo);
+    std::cout << static_cast<VisLinkModule*>(module)->getPluginInfo().windowDelegate << std::endl;
+    Texture tex = visLinkClient->getSharedTexture("hi");
+    std::cout << "External Handle" << tex.externalHandle << std::endl;
+    exit(0);
+
 	    // Init GL
            /* glEnable(GL_DEPTH_TEST);
             glClearDepth(1.0f);
@@ -338,6 +360,7 @@ void RenderableVisLink::update(const UpdateData& data) {
 }
 
 void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
+
     /*RaycasterTask task { _raycaster.get(), data };
     tasks.raycasterTasks.push_back(task);*/
         /*const glm::mat4 modelTransform =

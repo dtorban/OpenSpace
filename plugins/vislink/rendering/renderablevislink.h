@@ -31,10 +31,13 @@
 #include <openspace/properties/scalar/intproperty.h>
 #include <openspace/properties/vector/vec3property.h>
 #include <openspace/properties/vector/vec4property.h>
+#include <openspace/util/plugininfo.h>
+#include <openspace/util/openspacemodule.h>
 
 
 #include "OpenGL.h"
 //#include <ghoul/opengl/ghoul_gl.h>
+#include <VisLink/VisLinkAPI.h>
 
 namespace openspace {
 
@@ -42,7 +45,7 @@ struct RenderData;
 
 class RenderableVisLink : public Renderable {
 public:
-    RenderableVisLink(const ghoul::Dictionary& dictionary);
+    RenderableVisLink(const ghoul::Dictionary& dictionary, OpenSpaceModule* module);
     ~RenderableVisLink();
 
     void initializeGL() override;
@@ -65,6 +68,8 @@ private:
     properties::FloatProperty _downScaleVolumeRendering;
 
     GLuint vbo, vao, vshader, fshader, shaderProgram, externalTexture;
+    vislink::VisLinkAPI* visLinkClient;
+    OpenSpaceModule* module;
 };
 
 } // namespace openspace
