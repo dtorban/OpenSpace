@@ -22,36 +22,51 @@
  * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.                                         *
  ****************************************************************************************/
 
-#ifndef __OPENSPACE_MODULE_TOYVOLUME___VISLINKMODULE___H__
-#define __OPENSPACE_MODULE_TOYVOLUME___VISLINKMODULE___H__
+#ifndef __OPENSPACE_MODULE_TOYVOLUME___RENDERABLEVISLINK___H__
+#define __OPENSPACE_MODULE_TOYVOLUME___RENDERABLEVISLINK___H__
 
-#include <openspace/util/openspacemodule.h>
-#include <openspace/util/plugininfo.h>
-#include <thread>
-#include <VisLink/net/Server.h>
+#include <openspace/rendering/renderable.h>
+
+#include <openspace/properties/scalar/floatproperty.h>
+#include <openspace/properties/scalar/intproperty.h>
+#include <openspace/properties/vector/vec3property.h>
+#include <openspace/properties/vector/vec4property.h>
+
+
+#include "OpenGL.h"
+//#include <ghoul/opengl/ghoul_gl.h>
 
 namespace openspace {
 
-class VisLinkModule : public OpenSpaceModule {
+struct RenderData;
+
+class RenderableVisLink : public Renderable {
 public:
-    constexpr static const char* Name = "VisLink";
+    RenderableVisLink(const ghoul::Dictionary& dictionary);
+    ~RenderableVisLink();
 
-    VisLinkModule(PluginInfo pluginInfo);
-    ~VisLinkModule();
+    void initializeGL() override;
+    void deinitializeGL() override;
+    bool isReady() const override;
+    void render(const RenderData& data, RendererTasks& tasks) override;
+    void update(const UpdateData& data) override;
 
-    void internalInitialize(const ghoul::Dictionary&) override;
-    void internalInitializeGL() override;
-
-protected:
-	std::string modulePath() const { return pluginInfo.path; }
-	void runServer();
 
 private:
-	PluginInfo pluginInfo;
-	std::thread* serverThread;
-	vislink::Server* visLinkServer;
+    GLuint compileShader(const std::string& shaderText, GLenum shaderType);
+    void linkShaderProgram(GLuint shaderProgram);
+
+    properties::Vec3Property _size;
+    properties::IntProperty _scalingExponent;
+    properties::FloatProperty _stepSize;
+    properties::Vec3Property _translation;
+    properties::Vec3Property _rotation;
+    properties::Vec4Property _color;
+    properties::FloatProperty _downScaleVolumeRendering;
+
+    GLuint vbo, vao, vshader, fshader, shaderProgram, externalTexture;
 };
 
 } // namespace openspace
 
-#endif // __OPENSPACE_MODULE_TOYVOLUME___TESTPLUGINMODULE___H__
+#endif // __OPENSPACE_MODULE_TOYVOLUME___RENDERABLETOYVOLUME___H__

@@ -23,7 +23,7 @@
  ****************************************************************************************/
 
 
-#include "rendering/renderabletest.h"
+#include "rendering/renderablevislink.h"
 
 #include <openspace/engine/globals.h>
 #include <openspace/rendering/renderengine.h>
@@ -33,7 +33,7 @@
 
 
 namespace {
-    constexpr const char* _loggerCat = "Renderable Test";
+    constexpr const char* _loggerCat = "Renderable VisLink";
     constexpr openspace::properties::Property::PropertyInfo SizeInfo = {
         "Size",
         "Size",
@@ -80,7 +80,7 @@ namespace {
 
 namespace openspace {
 
-RenderableTest::RenderableTest(const ghoul::Dictionary& dictionary)
+RenderableVisLink::RenderableVisLink(const ghoul::Dictionary& dictionary)
     : Renderable(dictionary)
     , _size(SizeInfo, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f))
     , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
@@ -127,17 +127,17 @@ RenderableTest::RenderableTest(const ghoul::Dictionary& dictionary)
         _rayCastSteps = static_cast<int>(dictionary.value<float>("Steps"));
     }
     else {
-        LINFO("Number of raycasting steps not specified for ToyVolume."
-            " Using default value.");
+        LINFO("Number of raycasting steps not specified for ToyVolume." 
+            " Using default value."); 
     }*/
 
 }
 
-RenderableTest::~RenderableTest() {}
+RenderableVisLink::~RenderableVisLink() {}
 
 
     /// Compiles shader
-GLuint compileShader(const std::string& shaderText, GLenum shaderType) {
+GLuint RenderableVisLink::compileShader(const std::string& shaderText, GLenum shaderType) {
     const char* source = shaderText.c_str();
     int length = static_cast<int>(shaderText.size());
     GLuint shader = glCreateShader(shaderType);
@@ -157,7 +157,7 @@ GLuint compileShader(const std::string& shaderText, GLenum shaderType) {
 }
 
 /// links shader program
-void linkShaderProgram(GLuint shaderProgram) {
+void RenderableVisLink::linkShaderProgram(GLuint shaderProgram) {
     glLinkProgram(shaderProgram);
     GLint status;
     glGetProgramiv(shaderProgram, GL_LINK_STATUS, &status);
@@ -170,7 +170,7 @@ void linkShaderProgram(GLuint shaderProgram) {
     }
 }
 
-void RenderableTest::initializeGL() {
+void RenderableVisLink::initializeGL() {
     
 	    // Init GL
            /* glEnable(GL_DEPTH_TEST);
@@ -180,12 +180,12 @@ void RenderableTest::initializeGL() {
 
             // Create VBO
             GLfloat vertices[]  = { 
-                -0.5f, -0.5f, 0.0f, 
-                0.5f, -0.5f, 0.0f,
-                0.5f, 0.5f, 0.0f,
-                0.5f, 0.5f, 0.0f,
-                -0.5f, 0.5f, 0.0f, 
-                -0.5f, -0.5f, 0.0f};
+                -1.0f, -1.0f, 0.0f, 
+                1.0f, -1.0f, 0.0f,
+                1.0f, 1.0f, 0.0f,
+                1.0f, 1.0f, 0.0f,
+                -1.0f, 1.0f, 0.0f, 
+                -1.0f, -1.0f, 0.0f};
 
             // normal array
             GLfloat normals[]   = { 0, 0, 1,   0, 0, 1,   0, 0, 1,    0, 0, 1,   0, 0, 1,  0, 0, 1    };    // v6-v5-v4
@@ -228,7 +228,8 @@ void RenderableTest::initializeGL() {
                     "out vec3 col;"
                     ""
                     "void main() { "
-                    "   gl_Position = ProjectionMatrix*ViewMatrix*ModelMatrix*vec4(position, 1.0); "
+                    //"   gl_Position = ProjectionMatrix*ViewMatrix*ModelMatrix*vec4(position, 1.0); "
+                    "   gl_Position = vec4(position, 1.0); "
                     "   col = color;"
                     "}";
             vshader = compileShader(vertexShader, GL_VERTEX_SHADER);
@@ -295,21 +296,21 @@ void RenderableTest::initializeGL() {
     addProperty(_downScaleVolumeRendering);
 }
 
-void RenderableTest::deinitializeGL() {
+void RenderableVisLink::deinitializeGL() {
     /*if (_raycaster) {
         global::raycasterManager.detachRaycaster(*_raycaster.get());
         _raycaster = nullptr;
     }*/
 }
 
-bool RenderableTest::isReady() const {
+bool RenderableVisLink::isReady() const {
     // @TODO isReady function needs to be filled
     return true;
 }
 
 
 
-void RenderableTest::update(const UpdateData& data) {
+void RenderableVisLink::update(const UpdateData& data) {
     /*if (_raycaster) {
         glm::mat4 transform = glm::translate(
             glm::mat4(1.0),
@@ -336,7 +337,7 @@ void RenderableTest::update(const UpdateData& data) {
     }*/
 }
 
-void RenderableTest::render(const RenderData& data, RendererTasks& tasks) {
+void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
     /*RaycasterTask task { _raycaster.get(), data };
     tasks.raycasterTasks.push_back(task);*/
         /*const glm::mat4 modelTransform =

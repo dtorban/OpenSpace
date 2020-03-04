@@ -32,7 +32,7 @@ namespace openspace {
 TestPluginModule::TestPluginModule(const std::string& path) : OpenSpaceModule(Name), path(path) {}
 
 void TestPluginModule::internalInitialize(const ghoul::Dictionary&) {
-	std::cout << "Initialize test plugin" << std::endl;
+	std::cout << "Initialize test plugin" << std::endl; 
 	//exit(0);
     //auto fRenderable = FactoryManager::ref().factory<Renderable>();
     //ghoul_assert(fRenderable, "No renderable factory existed");

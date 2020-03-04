@@ -27,27 +27,46 @@
 #include<iostream>
 #include "vislinkmodule.h"
 #include "rendering/renderabletest.h"
+#include "rendering/renderablevislink.h"
 #include <openspace/util/factorymanager.h>
 #include <ghoul/misc/assert.h>
 #include <ghoul/misc/templatefactory.h>
+
+using namespace vislink;
 
 namespace openspace {
 
 VisLinkModule::VisLinkModule(PluginInfo pluginInfo) : OpenSpaceModule(Name), pluginInfo(pluginInfo) {}
 
+VisLinkModule::~VisLinkModule() {
+	serverThread->join();
+	delete serverThread;
+	delete visLinkServer;
+}
+
 void VisLinkModule::internalInitialize(const ghoul::Dictionary&) {
+	visLinkServer = new Server();
+	serverThread = new std::thread(&VisLinkModule::runServer, this);
+
 	std::cout << "Initialize vislink" << std::endl;
 	//auto fRenderable = FactoryManager::ref().factory<Renderable>();
 	auto fRenderable = this->pluginInfo.factoryManager->factory<Renderable>();
 	//Renderable* r = new Renderable();
     ghoul_assert(fRenderable, "No renderable factory existed");
 	//exit(0);
-    fRenderable->registerClass<RenderableTest>("RenderableTest");
-    std::cout << fRenderable->hasClass("RenderableTest") << std::endl;
+    //fRenderable->registerClass<RenderableTest>("RenderableTest");
+    fRenderable->registerClass<RenderableVisLink>("RenderableVisLink");
 }
 
 void VisLinkModule::internalInitializeGL() {
     initializeGLExtentions();
+}
+
+void VisLinkModule::runServer() {
+	while (true) {
+		std::cout << "Running" << std::endl;
+		visLinkServer->service();
+	}
 }
 
 } // namespace openspace
