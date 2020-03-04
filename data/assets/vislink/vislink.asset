@@ -1,0 +1,22 @@
+-- This asset requires OpenSpace to be built with the OPENSPACE_MODULE_TOYVOLUME enabled
+
+local assetHelper = asset.require("util/asset_helper")
+local transforms = asset.require("scene/solarsystem/sun/transforms")
+
+local VisLink = {
+    Identifier = "VisLink",
+    Parent = transforms.SolarSystemBarycenter.Identifier,
+    Renderable = {
+        Type = "RenderableTest",
+        Size = {5, 5, 5},
+        ScalingExponent = 10,
+        StepSize = 0.01,
+        Color = {1, 0, 0, 1}
+    },
+    GUI = {
+        Path = "/vislink"
+    }
+}
+
+local objects = { VisLink }
+assetHelper.registerSceneGraphNodesAndExport(asset, objects)
