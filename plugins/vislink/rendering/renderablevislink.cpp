@@ -137,6 +137,8 @@ RenderableVisLink::RenderableVisLink(const ghoul::Dictionary& dictionary, OpenSp
     }*/
     visLinkClient = new Client();
     visLinkAPI = visLinkClient;
+    startFrame =  visLinkAPI->getMessageQueue("start");
+    finishFrame =  visLinkAPI->getMessageQueue("finish");
 
 }
 
@@ -187,7 +189,12 @@ void RenderableVisLink::linkShaderProgram(GLuint shaderProgram) {
 
 void RenderableVisLink::initializeGL() {
     visLinkAPI = new VisLinkOpenGL(visLinkAPI, new VLOpenSpaceProcLoader(module));
+
     TextureInfo texInfo;
+    texInfo.width = 640;
+    texInfo.height = 480;
+    texInfo.components = 3;
+    //640 480 3
     visLinkAPI->createSharedTexture("test.png", texInfo);
     Texture tex = visLinkAPI->getSharedTexture("test.png");
     externalTexture = tex.id;
@@ -365,6 +372,9 @@ void RenderableVisLink::update(const UpdateData& data) {
 }
 
 void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
+    startFrame->sendMessage();
+    int frame = 256;
+    startFrame->sendObject<int>(frame);
     /*RaycasterTask task { _raycaster.get(), data };
     tasks.raycasterTasks.push_back(task);*/
         /*const glm::mat4 modelTransform =
@@ -413,6 +423,7 @@ void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
+        finishFrame->waitForMessage();
 }
 
 } // namespace openspace

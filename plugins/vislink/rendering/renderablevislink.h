@@ -71,6 +71,8 @@ private:
     vislink::Client* visLinkClient;
     vislink::VisLinkAPI* visLinkAPI;
     OpenSpaceModule* module;
+    vislink::MessageQueue* startFrame;
+    vislink::MessageQueue* finishFrame;
 };
 
 } // namespace openspace
