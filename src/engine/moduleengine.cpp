@@ -50,6 +50,7 @@ void ModuleEngine::initialize(
 {
     std::vector<std::string> pluginFolders;
     pluginFolders.push_back("build/plugins");
+    pluginFolders.push_back("bin/plugins");
     _pluginEngine = new PluginEngine(pluginFolders);
 
     std::vector<OpenSpaceModule*> allModules = AllModules();

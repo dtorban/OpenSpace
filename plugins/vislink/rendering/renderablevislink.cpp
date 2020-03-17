@@ -188,16 +188,21 @@ void RenderableVisLink::linkShaderProgram(GLuint shaderProgram) {
 }
 
 void RenderableVisLink::initializeGL() {
+#ifdef WIN32
+    visLinkAPI = new VisLinkOpenGL(visLinkAPI);
+#else
     visLinkAPI = new VisLinkOpenGL(visLinkAPI, new VLOpenSpaceProcLoader(module));
+#endif
 
     TextureInfo texInfo;
-    texInfo.width = 640;
-    texInfo.height = 480;
-    texInfo.components = 3;
+    texInfo.width = 512;
+    texInfo.height = 512;
+    texInfo.components = 4;
     //640 480 3
     visLinkAPI->createSharedTexture("test.png", texInfo);
     Texture tex = visLinkAPI->getSharedTexture("test.png");
     externalTexture = tex.id;
+    std::cout << "External Texture: " << externalTexture << std::endl;
 
 	    // Init GL
            /* glEnable(GL_DEPTH_TEST);
@@ -272,6 +277,7 @@ void RenderableVisLink::initializeGL() {
                 "   vec4 texColor = texture(tex, coord);"
                 "   colorOut = texColor; "
                 "   colorOut = vec4(colorOut.xyz,1); "
+                //"   colorOut = vec4(1,0,0,1); "
                 "}";
             fshader = compileShader(fragmentShader, GL_FRAGMENT_SHADER); 
 
@@ -372,9 +378,10 @@ void RenderableVisLink::update(const UpdateData& data) {
 }
 
 void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
-    startFrame->sendMessage();
+    /*startFrame->sendMessage();
     int frame = 256;
-    startFrame->sendObject<int>(frame);
+    startFrame->sendObject<int>(frame);*/
+
     /*RaycasterTask task { _raycaster.get(), data };
     tasks.raycasterTasks.push_back(task);*/
         /*const glm::mat4 modelTransform =
@@ -423,7 +430,8 @@ void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);
-        finishFrame->waitForMessage();
+
+        //finishFrame->waitForMessage();
 }
 
 } // namespace openspace
