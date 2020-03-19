@@ -276,6 +276,8 @@ void RenderableVisLink::initializeGL() {
                 "   vec2 coord = vec2(col.x, col.y);"
                 "   vec4 texColor = texture(tex, coord);"
                 "   colorOut = texColor; "
+                "   gl_FragDepth = 0.0;"
+                "   if (colorOut.a < 0.0001) {discard;}"
                 //"   colorOut = vec4(colorOut.xyz,1); "
                 //"   colorOut = vec4(1,0,0,1); "
                 "}";
@@ -395,18 +397,28 @@ void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
     	_shader->setUniform("modelViewTransform",
         glm::mat4(data.camera.combinedViewMatrix() * glm::dmat4(modelViewTransform)));*/
 
-        glm::mat4 view = glm::mat4(data.camera.combinedViewMatrix());
-        glm::mat4 proj = glm::mat4(data.camera.projectionMatrix());
-        glm::mat4 model = glm::mat4(glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
-        	glm::dmat4(data.modelTransform.rotation) *
-        	glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
-        	glm::dmat4(1.0));
+        glm::vec3 size = static_cast<glm::vec3>(_size);
 
-        model = model*glm::scale(
+        glm::dmat4 expScale = glm::scale( 
+            glm::dmat4(1.0),
+            glm::dvec3(size.x, size.y, size.z) *
+            static_cast<double>(std::pow(10.0f, _scalingExponent)) 
+        );
+
+        glm::dmat4 preciseModel = glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
+            glm::dmat4(data.modelTransform.rotation) *
+            glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
+            glm::dmat4(1.0)*expScale;
+
+        glm::mat4 proj = glm::mat4(data.camera.projectionMatrix());
+        glm::mat4 view = glm::mat4(data.camera.combinedViewMatrix()*preciseModel);
+        glm::mat4 model = glm::mat4(1.0);// glm::mat4(preciseModel);
+
+        /*model = model*glm::scale(
             glm::mat4(1.0),
             static_cast<glm::vec3>(_size) *
                 std::pow(10.0f, static_cast<float>(_scalingExponent))
-        );
+        );*/
 
         startFrame->sendMessage();
         int frame = 256;
