@@ -65,7 +65,8 @@ private:
     properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
     properties::Vec4Property _color;
-    properties::FloatProperty _downScaleVolumeRendering;
+    properties::FloatProperty _downScaleVolumeRendering; 
+    properties::StringProperty _visLinkTexture;
 
     GLuint vbo, vao, vshader, fshader, shaderProgram, externalTexture;
     vislink::Client* visLinkClient;

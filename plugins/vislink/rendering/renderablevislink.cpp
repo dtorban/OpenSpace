@@ -80,19 +80,26 @@ namespace {
         "This value set the downscaling factor"
         " when rendering the current volume."
     };
+
+    constexpr openspace::properties::Property::PropertyInfo VisLinkTexture = {
+        "VisLinkTexture",
+        "VisLinkTexture",
+        "" // @TODO Missing documentation
+    };
 } // namespace
 
 namespace openspace {
 
-RenderableVisLink::RenderableVisLink(const ghoul::Dictionary& dictionary, OpenSpaceModule* module)
-    : Renderable(dictionary)
-    , _size(SizeInfo, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f))
-    , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
-    , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f )
-    , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
-    , _rotation(RotationInfo, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0), glm::vec3(6.28f))
-    , _color(ColorInfo, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f))
-    , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
+    RenderableVisLink::RenderableVisLink(const ghoul::Dictionary& dictionary, OpenSpaceModule* module)
+        : Renderable(dictionary)
+        , _size(SizeInfo, glm::vec3(1.f, 1.f, 1.f), glm::vec3(0.f), glm::vec3(10.f))
+        , _scalingExponent(ScalingExponentInfo, 1, -10, 20)
+        , _stepSize(StepSizeInfo, 0.02f, 0.01f, 1.f)
+        , _translation(TranslationInfo, glm::vec3(0.f), glm::vec3(0.f), glm::vec3(10.f))
+        , _rotation(RotationInfo, glm::vec3(0.f, 0.f, 0.f), glm::vec3(0), glm::vec3(6.28f))
+        , _color(ColorInfo, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f))
+        , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
+        , _visLinkTexture(VisLinkTexture, "VisLink")
     , module(module)
 {
     if (dictionary.hasKeyAndValue<double>(ScalingExponentInfo.identifier)) {
@@ -121,6 +128,10 @@ RenderableVisLink::RenderableVisLink(const ghoul::Dictionary& dictionary, OpenSp
         _stepSize = static_cast<float>(dictionary.value<double>(StepSizeInfo.identifier));
     }
 
+    if (dictionary.hasKeyAndValue<std::string>(VisLinkTexture.identifier)) {
+        _visLinkTexture = static_cast<std::string>(dictionary.value<std::string>(VisLinkTexture.identifier));
+    }
+
     _downScaleVolumeRendering.setVisibility(
         openspace::properties::Property::Visibility::Developer
     );
@@ -137,8 +148,12 @@ RenderableVisLink::RenderableVisLink(const ghoul::Dictionary& dictionary, OpenSp
     }*/
     visLinkClient = new Client();
     visLinkAPI = visLinkClient;
-    startFrame =  visLinkAPI->getMessageQueue("start");
-    finishFrame =  visLinkAPI->getMessageQueue("finish");
+    std::string texName = _visLinkTexture;
+    std::string startFrameName = texName + "-start";
+    std::string finishFrameName = texName + "-finish";
+    startFrame =  visLinkAPI->getMessageQueue(startFrameName);
+    finishFrame =  visLinkAPI->getMessageQueue(finishFrameName);
+    //std::cout << texName << " " << startFrame << " " << finishFrame << " " << startFrameName << " " << finishFrameName << " " << std::endl;
 
 }
 
@@ -199,8 +214,9 @@ void RenderableVisLink::initializeGL() {
     texInfo.height = 512;
     texInfo.components = 4;
     //640 480 3
-    visLinkAPI->createSharedTexture("test.png", texInfo);
-    Texture tex = visLinkAPI->getSharedTexture("test.png");
+    std::string textureName = _visLinkTexture;
+    visLinkAPI->createSharedTexture(textureName, texInfo);
+    Texture tex = visLinkAPI->getSharedTexture(textureName);
     externalTexture = tex.id;
     std::cout << "External Texture: " << externalTexture << std::endl;
 

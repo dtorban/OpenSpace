@@ -5,8 +5,8 @@ local earth = asset.require("scene/solarsystem/planets/earth/earth")
 local transforms = asset.require("scene/solarsystem/planets/earth/transforms")
 -- local transforms = asset.require("scene/solarsystem/sun/transforms")
 
-local VisLink = {
-    Identifier = "VisLink",
+local Canoe = {
+    Identifier = "Canoe",
     -- Parent = transforms.EarthIAU.Identifier,
     -- Parent = transforms.SolarSystemBarycenter.Identifier,
     Parent = earth.Earth.Identifier,
@@ -28,16 +28,16 @@ local VisLink = {
     Renderable = {
         Type = "RenderableVisLink",
         Size = {5, 5, 5},
-        ScalingExponent = 6,
+        ScalingExponent = 2,
         -- ScalingExponent = 10,
         StepSize = 0.01,
         Color = {1, 0, 0, 1},
-	VisLinkTexture = "VisLink21"
+	VisLinkTexture = "Canoe"
     },
     GUI = {
-        Path = "/vislink"
+        Path = "/canoe"
     }
 }
 
-local objects = { VisLink }
+local objects = { Canoe }
 assetHelper.registerSceneGraphNodesAndExport(asset, objects)

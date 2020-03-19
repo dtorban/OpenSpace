@@ -1,5 +1,7 @@
 asset.require('./base')
 asset.require('vislink/vislink')
+-- asset.require('vislink/gulfofmexico')
+-- asset.require('vislink/canoe')
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
@@ -10,9 +12,9 @@ asset.onInitialize(function ()
 
     openspace.globebrowsing.goToGeo("Earth", 58.5877, 16.1924, 20000000)
 
-    openspace.markInterestingNodes({ "Earth", "Mars", "Moon", "Sun", "VisLink" })
+    openspace.markInterestingNodes({ "Earth", "Mars", "Moon", "Sun", "VisLink", "GulfOfMexico", "Canoe" })
 end)
 
 asset.onDeinitialize(function ()
-    openspace.removeInterestingNodes({ "Earth", "Mars", "Moon", "Sun", "VisLink" })
+    openspace.removeInterestingNodes({ "Earth", "Mars", "Moon", "Sun", "VisLink", "GulfOfMexico", "Canoe" })
 end)
