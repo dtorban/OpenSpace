@@ -276,7 +276,7 @@ void RenderableVisLink::initializeGL() {
                 "   vec2 coord = vec2(col.x, col.y);"
                 "   vec4 texColor = texture(tex, coord);"
                 "   colorOut = texColor; "
-                "   colorOut = vec4(colorOut.xyz,1); "
+                //"   colorOut = vec4(colorOut.xyz,1); "
                 //"   colorOut = vec4(1,0,0,1); "
                 "}";
             fshader = compileShader(fragmentShader, GL_FRAGMENT_SHADER); 
@@ -378,9 +378,6 @@ void RenderableVisLink::update(const UpdateData& data) {
 }
 
 void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
-    /*startFrame->sendMessage();
-    int frame = 256;
-    startFrame->sendObject<int>(frame);*/
 
     /*RaycasterTask task { _raycaster.get(), data };
     tasks.raycasterTasks.push_back(task);*/
@@ -410,6 +407,14 @@ void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
             static_cast<glm::vec3>(_size) *
                 std::pow(10.0f, static_cast<float>(_scalingExponent))
         );
+
+        startFrame->sendMessage();
+        int frame = 256;
+        startFrame->sendObject<int>(frame);
+        startFrame->sendData((const unsigned char*)(glm::value_ptr(proj)), 16 * sizeof(float));
+        startFrame->sendData((const unsigned char*)(glm::value_ptr(view)), 16 * sizeof(float));
+        startFrame->sendData((const unsigned char*)(glm::value_ptr(model)), 16 * sizeof(float));
+        finishFrame->waitForMessage();
 
         // Set shader parameters
         glUseProgram(shaderProgram);

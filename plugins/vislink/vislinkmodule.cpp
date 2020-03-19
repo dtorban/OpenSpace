@@ -74,7 +74,7 @@ void VisLinkModule::internalInitializeGL() {
 
 void VisLinkModule::runServer() {
 	while (true) {
-		std::cout << "Running" << std::endl;
+		//std::cout << "Running" << std::endl;
 		visLinkServer->service();
 	}
 }
