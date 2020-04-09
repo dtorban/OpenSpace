@@ -1,7 +1,7 @@
 asset.require('./base')
 asset.require('vislink/vislink')
-asset.require('vislink/gulfofmexico')
-asset.require('vislink/canoe')
+-- asset.require('vislink/gulfofmexico')
+-- asset.require('vislink/canoe')
 
 local earthAsset = asset.require('scene/solarsystem/planets/earth/earth')
 
