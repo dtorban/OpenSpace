@@ -100,6 +100,8 @@ namespace openspace {
         , _color(ColorInfo, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f))
         , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
         , _visLinkTexture(VisLinkTexture, "VisLink")
+        , viewFrame(0)
+        , viewFramesPerFrame(0)
     , module(module)
 {
     if (dictionary.hasKeyAndValue<double>(ScalingExponentInfo.identifier)) {
@@ -149,7 +151,7 @@ namespace openspace {
     visLinkClient = new Client();
     visLinkAPI = visLinkClient;
     std::string texName = _visLinkTexture;
-    std::string startFrameName = texName + "-start";
+    std::string startFrameName = texName + "-start"; 
     std::string finishFrameName = texName + "-finish";
     startFrame =  visLinkAPI->getMessageQueue(startFrameName);
     finishFrame =  visLinkAPI->getMessageQueue(finishFrameName);
@@ -158,6 +160,8 @@ namespace openspace {
 }
 
 RenderableVisLink::~RenderableVisLink() {
+    delete syncStrategyReady;
+    delete syncStrategyComplete;
     delete visLinkAPI;
 }
 
@@ -210,8 +214,8 @@ void RenderableVisLink::initializeGL() {
 #endif
 
     TextureInfo texInfo;
-    texInfo.width = 512;
-    texInfo.height = 512;
+    texInfo.width = 1024;
+    texInfo.height = 1024;
     texInfo.components = 4;
     //640 480 3
     std::string textureName = _visLinkTexture;
@@ -219,6 +223,23 @@ void RenderableVisLink::initializeGL() {
     Texture tex = visLinkAPI->getSharedTexture(textureName);
     externalTexture = tex.id;
     std::cout << "External Texture: " << externalTexture << std::endl;
+
+    std::cout << "Get semaphores" << std::endl;
+    std::string texName = textureName + "-ready";
+    textureReady = visLinkAPI->getSemaphore(texName);
+    texName = textureName + "-complete";
+    textureComplete = visLinkAPI->getSemaphore(texName);
+    std::cout << "Semaphores " << textureReady.externalHandle << " " << textureComplete.externalHandle << " " << textureReady.id << " " << textureComplete.id << std::endl;
+
+
+    //syncStrategyReady = new vislink::EmptySyncStrategy();
+    //syncStrategyComplete = new vislink::EmptySyncStrategy();
+    syncStrategyReady = new vislink::OpenGLSemaphoreSync();
+    syncStrategyComplete = new vislink::OpenGLSemaphoreSync();
+    syncStrategyReady->addObject(textureReady);
+    syncStrategyReady->addObject(vislink::WriteTexture(tex));
+    syncStrategyComplete->addObject(textureComplete);
+    syncStrategyComplete->addObject(vislink::ReadTexture(tex));
 
 	    // Init GL
            /* glEnable(GL_DEPTH_TEST);
@@ -293,7 +314,7 @@ void RenderableVisLink::initializeGL() {
                 "   vec4 texColor = texture(tex, coord);"
                 "   colorOut = texColor; "
                 "   gl_FragDepth = 0.0;"
-                "   if (colorOut.a < 0.0001) {discard;}"
+                "   if (length(colorOut) < 0.0001) {discard;}"
                 //"   colorOut = vec4(colorOut.xyz,1); "
                 //"   colorOut = vec4(1,0,0,1); "
                 "}";
@@ -393,10 +414,26 @@ void RenderableVisLink::update(const UpdateData& data) {
         _raycaster->setDownscaleRender(_downScaleVolumeRendering);
         _raycaster->setMaxSteps(_rayCastSteps);
     }*/
+
+
+    /*std::cout << "Frame " << frame << std::endl;
+    if (frame % 2 == 0 && frame > 1) {
+        finishFrame->waitForMessage();
+    }*/
+
+    if (viewFramesPerFrame == 0 && viewFrame > 0) {
+        viewFramesPerFrame = viewFrame;
+    }
+
 }
 
 void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
 
+
+    if (viewFramesPerFrame && viewFrame % viewFramesPerFrame == 0) {
+
+
+    //std::cout << "Render " << frame << std::endl;
     /*RaycasterTask task { _raycaster.get(), data };
     tasks.raycasterTasks.push_back(task);*/
         /*const glm::mat4 modelTransform =
@@ -436,13 +473,15 @@ void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
                 std::pow(10.0f, static_cast<float>(_scalingExponent))
         );*/
 
+        syncStrategyReady->signal();
         startFrame->sendMessage();
-        int frame = 256;
-        startFrame->sendObject<int>(frame);
+        startFrame->sendObject<int>(viewFrame);
+        startFrame->sendObject<int>(viewFramesPerFrame);
         startFrame->sendData((const unsigned char*)(glm::value_ptr(proj)), 16 * sizeof(float));
         startFrame->sendData((const unsigned char*)(glm::value_ptr(view)), 16 * sizeof(float));
         startFrame->sendData((const unsigned char*)(glm::value_ptr(model)), 16 * sizeof(float));
         finishFrame->waitForMessage();
+        syncStrategyComplete->waitForSignal(); 
 
         // Set shader parameters
         glUseProgram(shaderProgram);
@@ -450,7 +489,7 @@ void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
         glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(proj));
         loc = glGetUniformLocation(shaderProgram, "ViewMatrix");
         glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(view));
-        loc = glGetUniformLocation(shaderProgram, "ModelMatrix");
+        loc = glGetUniformLocation(shaderProgram, "ModelMatrix"); 
         glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(model));
 
         // Draw quad
@@ -465,6 +504,10 @@ void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
         glBindVertexArray(0);
 
         //finishFrame->waitForMessage();
+
+    }
+
+    viewFrame++;
 }
 
 } // namespace openspace

@@ -38,6 +38,7 @@
 #include "OpenGL.h"
 //#include <ghoul/opengl/ghoul_gl.h>
 #include <VisLink/net/Client.h>
+#include <VisLink/sync/SyncStrategy.h>
 
 namespace openspace {
 
@@ -74,6 +75,12 @@ private:
     OpenSpaceModule* module;
     vislink::MessageQueue* startFrame;
     vislink::MessageQueue* finishFrame;
+    vislink::Semaphore textureReady;
+    vislink::Semaphore textureComplete;
+    vislink::SyncStrategy* syncStrategyReady;
+    vislink::SyncStrategy* syncStrategyComplete;
+    int viewFrame;
+    int viewFramesPerFrame;
 };
 
 } // namespace openspace
