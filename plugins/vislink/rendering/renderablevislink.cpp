@@ -229,7 +229,7 @@ void RenderableVisLink::initializeGL() {
     textureReady = visLinkAPI->getSemaphore(texName);
     texName = textureName + "-complete";
     textureComplete = visLinkAPI->getSemaphore(texName);
-    std::cout << "Semaphores " << textureReady.externalHandle << " " << textureComplete.externalHandle << " " << textureReady.id << " " << textureComplete.id << std::endl;
+    std::cout << "Semaphores " << textureReady.externalHandle << " " << textureComplete.externalHandle << " " << textureReady.id << " " << textureComplete.id << std::endl; 
 
 
     //syncStrategyReady = new vislink::EmptySyncStrategy();
@@ -481,9 +481,11 @@ void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
         startFrame->sendData((const unsigned char*)(glm::value_ptr(view)), 16 * sizeof(float));
         startFrame->sendData((const unsigned char*)(glm::value_ptr(model)), 16 * sizeof(float));
         finishFrame->waitForMessage();
-        syncStrategyComplete->waitForSignal(); 
+        //std::cout << "Signal wait" << std::endl;
+        syncStrategyComplete->waitForSignal();
+        //std::cout << "finish Signal wait" << std::endl;
 
-        // Set shader parameters
+        // Set shader parameters 
         glUseProgram(shaderProgram);
         GLint loc = glGetUniformLocation(shaderProgram, "ProjectionMatrix");
         glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(proj));
@@ -501,9 +503,12 @@ void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
         //glUniform1i(loc, 0);
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        glBindVertexArray(0);
-
+        glBindVertexArray(0); 
+        //glFlush();
         //finishFrame->waitForMessage();
+        //glFinish();
+        //finishFrame->waitForMessage();
+        //glFlush();
 
     }
 
