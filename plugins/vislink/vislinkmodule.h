@@ -29,6 +29,7 @@
 #include <openspace/util/plugininfo.h>
 #include <thread>
 #include <VisLink/net/Server.h>
+#include "src/MicroService.h"
 
 namespace openspace {
 

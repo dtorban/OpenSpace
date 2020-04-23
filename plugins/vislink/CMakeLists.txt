@@ -61,6 +61,7 @@ add_external(VisLinkLib
 
 set(DEP_LINK_DIRS ${DEP_LINK_DIRS} ${external_dir}/VisLinkLib/install/lib)
 set(DEP_INCLUDES ${DEP_INCLUDES} ${external_dir}/VisLinkLib/src/src)
+set(DEP_INCLUDES ${DEP_INCLUDES} ${external_dir}/VisLinkLib/src/microservices/MicroService)
 
 set(vislink_external_dir ${external_dir}/VisLinkLib/src/cmake/framework/external)
 

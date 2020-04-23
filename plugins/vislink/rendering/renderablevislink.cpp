@@ -34,6 +34,7 @@
 #include "vislinkmodule.h"
 #include "rendering/VLOpenSpaceProcLoader.h"
 
+
 using namespace vislink;
 
 namespace {
@@ -102,6 +103,7 @@ namespace openspace {
         , _visLinkTexture(VisLinkTexture, "VisLink")
         , viewFrame(0)
         , viewFramesPerFrame(0)
+        , microService(NULL)
     , module(module)
 {
     if (dictionary.hasKeyAndValue<double>(ScalingExponentInfo.identifier)) {
@@ -308,7 +310,7 @@ void RenderableVisLink::initializeGL() {
                 "in vec3 col;"
                 "out vec4 colorOut;"
                 "uniform sampler2D tex; "
-                ""
+                "" 
                 "void main() { "
                 "   vec2 coord = vec2(col.x, col.y);"
                 "   vec4 texColor = texture(tex, coord);"
@@ -432,7 +434,6 @@ void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
 
     if (viewFramesPerFrame && viewFrame % viewFramesPerFrame == 0) {
 
-
     //std::cout << "Render " << frame << std::endl;
     /*RaycasterTask task { _raycaster.get(), data };
     tasks.raycasterTasks.push_back(task);*/
@@ -481,7 +482,24 @@ void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
         startFrame->sendData((const unsigned char*)(glm::value_ptr(view)), 16 * sizeof(float));
         startFrame->sendData((const unsigned char*)(glm::value_ptr(model)), 16 * sizeof(float));
         finishFrame->waitForMessage();
-        syncStrategyComplete->waitForSignal(); 
+        syncStrategyComplete->waitForSignal();
+
+        if (!microService) {
+
+            std::string textureName = _visLinkTexture;
+            microService = new MicroService(textureName + "-service", visLinkAPI);
+            microService->addTexture(textureName, MICROSERVICE_INPUT_TEXTURE);
+            serviceOutput = microService->addTexture(textureName + "-output", MICROSERVICE_OUTPUT_TEXTURE);
+        }
+
+        // Apply Filter by calling microservice
+        //GLuint outputTexture = input.id;
+        if (true) {
+            vislink::MessageQueue* queue = microService->begin();
+            queue->sendObject(glm::vec4(0, 1, 0, 1));
+            microService->end();
+            externalTexture = serviceOutput.id;
+        }
 
         // Set shader parameters
         glUseProgram(shaderProgram);
@@ -495,10 +513,10 @@ void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
         // Draw quad
         glBindVertexArray(vao);
         glActiveTexture(GL_TEXTURE0+0);
-        //std::cout << externalTexture << std::endl;
+        //std::cout << externalTexture << std::endl; 
         glBindTexture(GL_TEXTURE_2D, externalTexture);
         //loc = glGetUniformLocation(shaderProgram, "tex");
-        //glUniform1i(loc, 0);
+        //glUniform1i(loc, 0); 
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
         glBindVertexArray(0);

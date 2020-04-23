@@ -39,6 +39,7 @@
 //#include <ghoul/opengl/ghoul_gl.h>
 #include <VisLink/net/Client.h>
 #include <VisLink/sync/SyncStrategy.h>
+#include "src/MicroService.h"
 
 namespace openspace {
 
@@ -81,6 +82,9 @@ private:
     vislink::SyncStrategy* syncStrategyComplete;
     int viewFrame;
     int viewFramesPerFrame;
+
+    MicroService* microService;
+    vislink::Texture serviceOutput;
 };
 
 } // namespace openspace
