@@ -338,7 +338,7 @@ void mainInitFunc() {
                 windowPtr->getYFramebufferResolution()
             );
 
-            SpoutWindow::SpoutData& right = w.right;
+            SpoutWindow::SpoutData& right = w.right; 
             right.handle = GetSpout();
             right.initialized = right.handle->CreateSender(
                 (windowPtr->getName() + "_right").c_str(),

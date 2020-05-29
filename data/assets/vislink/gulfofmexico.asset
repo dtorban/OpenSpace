@@ -15,12 +15,16 @@ local GulfOfMexico = {
     },
     Renderable = {
         Type = "RenderableVisLink",
+--	Type = "RenderablePlaneSpout",
+	--Type = "ScreenSpaceSpout",
+       -- Size = 10000.0,
         Size = {1, 1, 1},
         ScalingExponent = 6,
         -- ScalingExponent = 10,
         StepSize = 0.01,
         Color = {1, 0, 0, 1},
-	VisLinkTexture = "GulfOfMexico"
+        VisLinkTexture = "GulfOfMexico",
+        VisLinkClient = "client"
     },
     GUI = {
         Path = "/gulf"
@@ -29,3 +33,12 @@ local GulfOfMexico = {
 
 local objects = { GulfOfMexico }
 assetHelper.registerSceneGraphNodesAndExport(asset, objects)
+
+--local spec = {
+--    Type = "ScreenSpaceSpout",
+--    Identifier = "GulfOfMexico",
+--    Name = "Screen Space Browser Example",
+--    Url = "https://www.openspaceproject.com/"
+--};
+
+--assetHelper.registerScreenSpaceRenderables(asset, { spec })

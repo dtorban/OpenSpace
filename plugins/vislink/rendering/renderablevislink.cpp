@@ -34,6 +34,24 @@
 #include "vislinkmodule.h"
 #include "rendering/VLOpenSpaceProcLoader.h"
 
+#include <string>
+#include <algorithm>
+#include <iterator>
+
+template <class Container>
+void renderableVisLinkSplit(const std::string& str, Container& cont,
+    char delim = ' ')
+{
+    std::size_t current, previous = 0;
+    current = str.find(delim);
+    while (current != std::string::npos) {
+        cont.push_back(str.substr(previous, current - previous));
+        previous = current + 1;
+        current = str.find(delim, previous);
+    }
+    cont.push_back(str.substr(previous, current - previous));
+}
+
 using namespace vislink;
 
 namespace {
@@ -86,6 +104,13 @@ namespace {
         "VisLinkTexture",
         "" // @TODO Missing documentation
     };
+
+    constexpr openspace::properties::Property::PropertyInfo VisLinkClient = {
+    "VisLinkClient",
+    "VisLinkClient",
+    "" // @TODO Missing documentation
+    };
+
 } // namespace
 
 namespace openspace {
@@ -100,6 +125,7 @@ namespace openspace {
         , _color(ColorInfo, glm::vec4(1.f, 0.f, 0.f, 0.1f), glm::vec4(0.f), glm::vec4(1.f))
         , _downScaleVolumeRendering(DownscaleVolumeRenderingInfo, 1.f, 0.1f, 1.f)
         , _visLinkTexture(VisLinkTexture, "VisLink")
+        , _visLinkClient(VisLinkClient, "client")
         , viewFrame(0)
         , viewFramesPerFrame(0)
     , module(module)
@@ -134,6 +160,20 @@ namespace openspace {
         _visLinkTexture = static_cast<std::string>(dictionary.value<std::string>(VisLinkTexture.identifier));
     }
 
+    if (dictionary.hasKeyAndValue<std::string>(VisLinkClient.identifier)) {
+        _visLinkClient = static_cast<std::string>(dictionary.value<std::string>(VisLinkClient.identifier));
+    }
+
+    clientName = _visLinkClient;
+    textureName = _visLinkTexture;
+    /*std::vector<std::string> strs;
+    renderableVisLinkSplit(textureName, strs, ':');
+    if (strs.size() > 1) {
+        clientName = strs[0];
+        textureName = strs[1];
+    }*/
+
+   
     _downScaleVolumeRendering.setVisibility(
         openspace::properties::Property::Visibility::Developer
     );
@@ -150,13 +190,15 @@ namespace openspace {
     }*/
     visLinkClient = new Client();
     visLinkAPI = visLinkClient;
-    std::string texName = _visLinkTexture;
-    std::string startFrameName = texName + "-start"; 
-    std::string finishFrameName = texName + "-finish";
+    std::string startFrameName = clientName + "-start";
+    std::string finishFrameName = clientName + "-finish";
     startFrame =  visLinkAPI->getMessageQueue(startFrameName);
     finishFrame =  visLinkAPI->getMessageQueue(finishFrameName);
     //std::cout << texName << " " << startFrame << " " << finishFrame << " " << startFrameName << " " << finishFrameName << " " << std::endl;
 
+    static int visLinkCount = 0;
+    visLinkId = visLinkCount;
+    visLinkCount++;
 }
 
 RenderableVisLink::~RenderableVisLink() {
@@ -214,11 +256,11 @@ void RenderableVisLink::initializeGL() {
 #endif
 
     TextureInfo texInfo;
-    texInfo.width = 1024;
-    texInfo.height = 1024;
+    texInfo.width = 4096;
+    texInfo.height = 4096;
     texInfo.components = 4;
+    texInfo.format = TEXTURE_FORMAT_RGBA8_UNORM;
     //640 480 3
-    std::string textureName = _visLinkTexture;
     visLinkAPI->createSharedTexture(textureName, texInfo);
     Texture tex = visLinkAPI->getSharedTexture(textureName);
     externalTexture = tex.id;
@@ -458,13 +500,16 @@ void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
             static_cast<double>(std::pow(10.0f, _scalingExponent)) 
         );
 
+        glm::dmat4 mi = glm::dmat4(1.0);
+        mi[0][0] = 1.0;
+
         glm::dmat4 preciseModel = glm::translate(glm::dmat4(1.0), data.modelTransform.translation) *
             glm::dmat4(data.modelTransform.rotation) *
             glm::scale(glm::dmat4(1.0), glm::dvec3(data.modelTransform.scale)) *
             glm::dmat4(1.0)*expScale;
 
         glm::mat4 proj = glm::mat4(data.camera.projectionMatrix());
-        glm::mat4 view = glm::mat4(data.camera.combinedViewMatrix()*preciseModel);
+        glm::mat4 view = glm::mat4(mi*data.camera.combinedViewMatrix()*preciseModel*mi);
         glm::mat4 model = glm::mat4(1.0);// glm::mat4(preciseModel);
 
         /*model = model*glm::scale(
@@ -475,12 +520,24 @@ void RenderableVisLink::render(const RenderData& data, RendererTasks& tasks) {
 
         syncStrategyReady->signal();
         startFrame->sendMessage();
+        startFrame->sendObject<int>(visLinkId);
         startFrame->sendObject<int>(viewFrame);
-        startFrame->sendObject<int>(viewFramesPerFrame);
+        //startFrame->sendObject<int>(viewFramesPerFrame);
         startFrame->sendData((const unsigned char*)(glm::value_ptr(proj)), 16 * sizeof(float));
         startFrame->sendData((const unsigned char*)(glm::value_ptr(view)), 16 * sizeof(float));
         startFrame->sendData((const unsigned char*)(glm::value_ptr(model)), 16 * sizeof(float));
+
         finishFrame->waitForMessage();
+        int moreData = finishFrame->receiveObject<int>();
+        if (moreData) {
+            startFrame->sendMessage();
+            startFrame->sendObject<int>(viewFramesPerFrame);
+            std::string textureName = _visLinkTexture;
+            startFrame->sendObject<int>(textureName.length());
+            startFrame->sendData((unsigned char*)textureName.c_str(), textureName.length());
+            finishFrame->waitForMessage();
+        }
+
         //std::cout << "Signal wait" << std::endl;
         syncStrategyComplete->waitForSignal();
         //std::cout << "finish Signal wait" << std::endl;

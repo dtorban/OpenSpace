@@ -66,8 +66,9 @@ private:
     properties::Vec3Property _translation;
     properties::Vec3Property _rotation;
     properties::Vec4Property _color;
-    properties::FloatProperty _downScaleVolumeRendering; 
+    properties::FloatProperty _downScaleVolumeRendering;
     properties::StringProperty _visLinkTexture;
+    properties::StringProperty _visLinkClient;
 
     GLuint vbo, vao, vshader, fshader, shaderProgram, externalTexture;
     vislink::Client* visLinkClient;
@@ -81,6 +82,9 @@ private:
     vislink::SyncStrategy* syncStrategyComplete;
     int viewFrame;
     int viewFramesPerFrame;
+    int visLinkId;
+    std::string clientName;
+    std::string textureName;
 };
 
 } // namespace openspace
